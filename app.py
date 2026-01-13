@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import os
 import time
 import jwt
@@ -11,20 +12,28 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from monitor import KimchiPremiumMonitor
 
-RULES_FILE = "rules.json"
-WALLET_FILE = "wallet.json"
+from supabase import create_client, Client
 
-# Gemini AI 초기화
-load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-else:
-    model = None
+# Supabase 초기화
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") # 관리자 권한 키 사용
+db: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
 monitor = KimchiPremiumMonitor()
 load_dotenv()
+
+# 보안 설정 (단순 비밀번호)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "1234") # 기본값은 1234
+security = HTTPBasic()
+
+def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.password != ADMIN_PASSWORD:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 app = FastAPI()
 
@@ -76,21 +85,17 @@ async def get_market_data():
 
 @app.get("/api/rules")
 async def get_rules():
-    if not os.path.exists(RULES_FILE):
-        return [{"name": "기본 김프 매매 (관찰 중)", "status": "수익률: +0.00%"}]
-    with open(RULES_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    if db:
+        res = db.table("trading_rules").select("*").order("created_at").execute()
+        return res.data
+    return [{"name": "기본 김프 매매 (DB 미연결)", "status": "수익률: +0.00%"}]
 
 @app.post("/api/rules")
 async def add_rule(rule: dict):
-    rules = []
-    if os.path.exists(RULES_FILE):
-        with open(RULES_FILE, "r", encoding="utf-8") as f:
-            rules = json.load(f)
-    rules.append({"name": rule['name'], "status": "대기 중..."})
-    with open(RULES_FILE, "w", encoding="utf-8") as f:
-        json.dump(rules, f, ensure_ascii=False)
-    return {"status": "success"}
+    if db:
+        db.table("trading_rules").insert({"name": rule['name'], "status": "대기 중..."}).execute()
+        return {"status": "success"}
+    return {"status": "error", "message": "DB 미연결"}
 
 @app.get("/api/ai-suggestion")
 async def get_ai_suggestion():
@@ -124,18 +129,25 @@ async def get_ai_suggestion():
 
 @app.get("/api/mock-wallet")
 async def get_mock_wallet():
-    if not os.path.exists(WALLET_FILE):
-        initial_wallet = {"krw": 10000000, "assets": {}}
-        with open(WALLET_FILE, "w") as f: json.dump(initial_wallet, f)
-        return initial_wallet
-    with open(WALLET_FILE, "r") as f: return json.load(f)
+    if db:
+        res = db.table("mock_wallet").select("*").eq("id", 1).maybe_single().execute()
+        if res.data:
+            return res.data
+        # 데이터가 없으면 초기화
+        initial = {"id": 1, "krw": 10000000, "assets": {}}
+        db.table("mock_wallet").insert(initial).execute()
+        return initial
+    return {"krw": 0, "assets": {}, "message": "DB 미연결"}
 
 @app.post("/api/mock-trade")
 async def mock_trade(order: dict):
-    # order format: {"side": "buy/sell", "symbol": "BTC", "amount_krw": 1000000}
-    with open(WALLET_FILE, "r") as f: wallet = json.load(f)
+    if not db: return {"status": "error", "message": "DB 미연결"}
+    
+    res = db.table("mock_wallet").select("*").eq("id", 1).single().execute()
+    wallet = res.data
+    
     market_data = monitor.get_combined_data()
-    current_price = market_data['prices']['upbit'] # 거래는 편의상 업비트 가격 기준
+    current_price = market_data['prices']['upbit']
     
     if order['side'] == 'buy':
         if wallet['krw'] < order['amount_krw']:
@@ -149,7 +161,7 @@ async def mock_trade(order: dict):
         wallet['krw'] += coin_amount * current_price
         wallet['assets'][order['symbol']] = 0
 
-    with open(WALLET_FILE, "w") as f: json.dump(wallet, f)
+    db.table("mock_wallet").update(wallet).eq("id", 1).execute()
     return {"status": "success", "wallet": wallet}
 
 @app.get("/api/balances")
@@ -172,7 +184,7 @@ async def get_balances():
     }
 
 @app.get("/", response_class=HTMLResponse)
-async def read_index():
+async def read_index(token: str = Depends(authenticate)):
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
 
