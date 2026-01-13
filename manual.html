@@ -11,6 +11,8 @@
             --card: #1e293b;
             --text: #f1f5f9;
             --accent-purple: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
         }
         body {
             font-family: 'Inter', system-ui, sans-serif;
@@ -25,7 +27,7 @@
             margin: 0 auto;
         }
         h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        h2 { margin-top: 40px; color: #38bdf8; }
+        h2 { margin-top: 40px; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
         .card {
             background: var(--card);
             padding: 25px;
@@ -40,23 +42,38 @@
             border-left: 4px solid var(--accent-purple);
             margin: 10px 0;
         }
+        .step-badge {
+            background: var(--primary);
+            color: var(--bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
         .link-btn {
             display: inline-block;
             margin-top: 10px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--primary);
             font-weight: bold;
             text-decoration: none;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 6px;
         }
-        .link-btn:hover { text-decoration: underline; }
+        .link-btn:hover { background: rgba(0, 210, 255, 0.2); text-decoration: none; }
         code {
-            background: #334155;
-            padding: 2px 6px;
+            background: #000;
+            color: #4ade80;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-family: monospace;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95rem;
         }
-        a { color: var(--primary); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        .copy-val {
+            color: var(--warning);
+            font-weight: bold;
+        }
         .back-btn {
             display: inline-block;
             margin-bottom: 20px;
@@ -68,72 +85,80 @@
 <body>
     <div class="container">
         <a href="/" class="back-btn">← 대시보드로 돌아가기</a>
-        <h1>🛠️ 트레이딩 본부 통합 매뉴얼</h1>
+        <h1>🛠️ 트레이딩 본부 운영 & 도메인 매뉴얼</h1>
         
+        <!-- 1섹션: 깃허브 업로드 -->
         <div class="card">
-            <h2>🏗️ 1. GitHub (코드 업데이트)</h2>
-            <p>프로그램의 기능을 수정하거나 업데이트할 때 사용합니다.</p>
+            <h2>🏗️ 1. 프로그램 업데이트 (배달하기)</h2>
+            <p>제가(AI) 코드를 다 짜두면, 사용자님은 이 파일을 깃허브로 옮겨만 주시면 됩니다.</p>
             <div class="highlight-box">
-                <p style="margin: 0;"><b>⬆️ 파일 업로드 및 커밋 주소</b></p>
-                <a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank" class="link-btn">[여기를 클릭해서 새 파일 업로드하기]</a>
+                <p style="margin: 0;"><b>따라하기:</b> 수정된 파일(app.py 등) 4개를 잡아서 아래 창에 던지세요.</p>
+                <a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank" class="link-btn">🔗 여기를 눌러서 파일 던지기</a>
             </div>
-            <ul style="margin-top: 15px;">
-                <li>파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
-            </ul>
+            <p style="font-size: 0.9rem; color: #94a3b8;">※ 파일 던진 후 아래쪽 초록색 <b>[Commit changes]</b> 버튼을 눌러야 진짜 완료입니다!</p>
         </div>
 
+        <!-- 2섹션: 도메인 연결 (가장 중요한 부분) -->
+        <div class="card" style="border: 2px solid var(--primary);">
+            <h2>🌐 2. 나만의 도메인 연결 (3단계)</h2>
+            <p><code>dashboard-ai9x.onrender.com</code> 대신 <code>www.내도메인.com</code>을 쓰는 방법입니다.</p>
+            
+            <div style="margin-top: 20px;">
+                <p><span class="step-badge">1단계</span> <b>Render에 도메인 알리기</b></p>
+                <ul>
+                    <li><a href="https://dashboard.render.com/web/srv-d5it25muk2gs73dk2nh0/settings#custom-domains" target="_blank">여기(설정창)</a>로 가서 <b>[Add Custom Domain]</b>을 누르세요.</li>
+                    <li>사용자님의 도메인(예: <code>tradingbit.com</code>)을 입력하고 저장하세요.</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><span class="step-badge">2단계</span> <b>Cloudflare에 주소 등록하기</b></p>
+                <ul>
+                    <li>사용자님의 <a href="https://dash.cloudflare.com/" target="_blank">클라우드플레어 DNS 설정</a>으로 갑니다.</li>
+                    <li><b>[Add record]</b> 버튼을 누르고 아래 표처럼 입력하세요.</li>
+                </ul>
+                <table style="width:100%; border-collapse: collapse; margin-top: 10px; background: #000; border-radius: 8px; overflow: hidden;">
+                    <tr style="background: #334155; text-align: left;">
+                        <th style="padding: 10px;">Type (형식)</th>
+                        <th style="padding: 10px;">Name (이름)</th>
+                        <th style="padding: 10px;">Target (대상/값)</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #222;">CNAME</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #222;"><code>www</code></td>
+                        <td style="padding: 10px; border-bottom: 1px solid #222;"><code>dashboard-ai9x.onrender.com</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px;">A</td>
+                        <td style="padding: 10px;"><code>@</code></td>
+                        <td style="padding: 10px;"><code class="copy-val">216.24.57.1</code> (렌더 고정 IP)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><span class="step-badge">3단계</span> <b>확인하기</b></p>
+                <p>약 5~10분 뒤에 내 도메인으로 접속했을 때 대시보드가 뜨면 성공입니다!</p>
+            </div>
+        </div>
+
+        <!-- 3섹션: 관리 및 로그 -->
         <div class="card">
-            <h2>🚀 2. Render (서버 접속 및 비밀번호)</h2>
-            <p>24시간 서버 가동과 접속 주소를 관리합니다.</p>
-            <div class="highlight-box" style="border-left-color: var(--primary); background: rgba(0,210,255,0.05);">
-                <p style="margin: 0; font-size: 1.1rem;"><b>🔐 고정 로그인 정보</b></p>
-                <p style="margin: 5px 0 0 0; font-size: 1.3rem; color: var(--primary); font-weight: bold; letter-spacing: 1px;">
-                    ID: admin / PW: 1234
-                </p>
-            </div>
-            <ul style="margin-top: 15px;">
-                <li><b>접속 주소:</b> <a href="https://dashboard-ai9x.onrender.com" target="_blank">dashboard-ai9x.onrender.com</a></li>
-                <li><b>관리자 대시보드:</b> <a href="https://dashboard.render.com/" target="_blank">dashboard.render.com</a></li>
-                <li><b>비번 수정:</b> Render [Environment] 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 수정하세요.</li>
-            </ul>
-        </div>
-
-        <div class="card" style="border: 1px solid #ef4444;">
-            <h2 style="color: #ef4444;">⚠️ 3. 화면이 멈췄거나 안 뜰 때</h2>
-            <p>서버 업데이트 중이거나 에러 발생 시 확인 방법입니다.</p>
+            <h2>🚨 3. 갑자기 안 될 때 (로그 확인)</h2>
             <div class="highlight-box" style="border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
-                <p style="margin: 0;"><b>📋 실시간 서버 로그 확인</b></p>
-                <a href="https://dashboard.render.com/web/srv-d5it25muk2gs73dk2nh0/logs?r=1h" target="_blank" style="color: #ef4444;" class="link-btn">[여기를 클릭해서 로그 확인하기]</a>
+                <p style="margin: 0; color: #ef4444;"><b>실시간 상황판</b></p>
+                <a href="https://dashboard.render.com/web/srv-d5it25muk2gs73dk2nh0/logs" target="_blank" class="link-btn" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">🔗 서버 로그 바로 확인하기</a>
             </div>
-            <ul style="margin-top: 15px;">
-                <li><b>강제 재시작:</b> Render 상단 <b>[Manual Deploy]</b> -> <b>[Clear Build Cache & Deploy]</b> 클릭.</li>
-                <li><b>대기:</b> 깃허브 업로드 후 약 2~3분간 설치 시간이 필요합니다.</li>
-            </ul>
+            <p>로그 창에 빨간 글자가 가득하다면, 그 내용을 저에게 복사해서 알려주세요!</p>
         </div>
 
+        <!-- 4섹션: 고정 정보 -->
         <div class="card">
-            <h2>☁️ 4. Cloudflare (다중 도메인 확보)</h2>
-            <p>서버가 하나 더 필요하거나 보조 도메인이 필요할 때 사용합니다.</p>
-            <div class="highlight-box">
-                <p style="margin: 0;"><b>🔗 클라우드플레어 대시보드</b></p>
-                <a href="https://dash.cloudflare.com/" target="_blank" class="link-btn">[여기를 클릭해서 접속하기]</a>
+            <h2>🔐 4. 대시보드 로그인 정보</h2>
+            <div class="highlight-box" style="border-left-color: var(--success); background: rgba(16, 185, 129, 0.05);">
+                <p style="margin: 0; color: var(--success); font-weight: bold;">ID: admin / PW: 1234</p>
             </div>
-            <ul style="margin-top: 15px;">
-                <li><b>[Workers & Pages]</b> -> <b>[Pages]</b> 메뉴 선택.</li>
-                <li><b>[Connect to Git]</b>으로 우리 깃허브 저장소를 연결하면 자동 배포됩니다.</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h2>🤖 5. AI 자율 엔진 작동 방식</h2>
-            <div class="highlight-box" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.05);">
-                <p style="margin: 0; color: #10b981;"><b>🕒 1시간 주기 자동 업데이트</b></p>
-                <p style="margin: 5px 0 0 0;">AI는 매시간 정각마다 시장을 분석해 새로운 규칙을 생성합니다.</p>
-            </div>
-            <ul style="margin-top: 15px;">
-                <li><b>확인 방법:</b> 대시보드 메인 화면의 '매매 규칙' 목록 확인.</li>
-                <li><b>구분:</b> 이름 앞에 <b>[AI 자율]</b> 머리말이 붙은 규칙들이 AI가 만든 것입니다.</li>
-            </ul>
+            <p style="font-size: 0.9rem; color: #94a3b8;">※ 비밀번호 변경은 Render의 [Environment] 탭에서 <code>ADMIN_PASSWORD</code> 값을 고치면 됩니다.</p>
         </div>
     </div>
 </body>
