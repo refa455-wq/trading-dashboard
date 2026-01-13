@@ -23,7 +23,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
         .edit-btn {
             background: #2563eb;
             color: white;
@@ -61,17 +61,17 @@
 <body>
     <div class="container">
         <a href="/" class="back-btn">← 대시보드로 돌아가기</a>
-        <h1>
-            <span>🛠️ 트레이딩 본부 통합 매뉴얼</span>
-            <a href="https://github.com/refa455-wq/trading-dashboard/edit/main/manual.html" target="_blank" class="edit-btn">✏️ 매뉴얼 수정하기</a>
-        </h1>
+        <h1>🛠️ 트레이딩 본부 통합 매뉴얼</h1>
         
         <div class="card">
             <h2>🏗️ 1. GitHub (코드 업데이트)</h2>
             <p>프로그램의 기능을 수정하거나 업데이트할 때 사용합니다.</p>
-            <ul>
-                <li>수정된 <code>app.py</code>를 <a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank">여기</a>에 업로드하세요.</li>
-                <li>파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
+            <div style="background: rgba(129, 140, 248, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent-purple);">
+                <p style="margin: 0;"><b>⬆️ 파일 업로드 및 커밋 주소</b></p>
+                <p style="margin: 5px 0 0 0;"><a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank" style="font-size: 1.1rem; color: #818cf8; font-weight: bold;">[여기를 클릭해서 새 파일 업로드하기]</a></p>
+            </div>
+            <ul style="margin-top: 15px;">
+                <li>수정된 파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
             </ul>
         </div>
 
