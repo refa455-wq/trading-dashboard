@@ -277,17 +277,18 @@
             </div>
         </div>
 
-        <!-- AI 추천 전략 섹션 -->
-        <div class="card" style="margin-top: 2rem; border: 1px solid var(--accent-purple); background: rgba(129, 140, 248, 0.1);">
-            <div class="label" style="color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
-                <span class="live">✨</span> Gemini AI 실시간 추천 전략
+        <!-- AI 트레이딩 에이전트 채팅 섹션 -->
+        <div class="card" style="margin-top: 2rem; border: 1px solid var(--accent-purple); background: rgba(129, 140, 248, 0.1); display: flex; flex-direction: column; gap: 15px;">
+            <div class="label" style="color: var(--accent-purple); display: flex; align-items: center; gap: 8px; justify-content: space-between;">
+                <span><span class="live">✨</span> AI 트레이딩 매니저 (실시간 상담)</span>
+                <button onclick="updateAISuggestion()" style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.7rem;">[새 분석]</button>
             </div>
-            <div id="ai-suggestion" class="value" style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.6; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 1rem; min-height: 80px;">
-                AI가 시장 데이터를 분석 중입니다...
+            <div id="ai-chat-window" style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 1rem; padding: 1rem; font-size: 0.9rem; line-height: 1.5; display: flex; flex-direction: column; gap: 10px;">
+                <div style="color: var(--accent-purple);"><b>AI 매니저:</b> 안녕하세요! 현재 시장 상황을 분석 중입니다. 궁금한 점을 물어보시거나 "규칙 하나 짜줘"라고 해보세요.</div>
             </div>
-            <div style="margin-top: 1rem; display: flex; gap: 10px;">
-                <button onclick="applyAISuggestion()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; background: var(--accent-purple); color: white; cursor: pointer; font-size: 0.8rem; font-weight: 600;">규칙으로 추가하기</button>
-                <button onclick="updateAISuggestion()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--glass-border); background: transparent; color: var(--text-dim); cursor: pointer; font-size: 0.8rem;">다시 분석</button>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="ai-chat-msg" placeholder="여기에 질문하거나 명령하세요..." style="flex: 1; padding: 0.8rem; border-radius: 0.8rem; border: 1px solid var(--glass-border); background: var(--bg-color); color: white;" onkeypress="if(event.keyCode==13) sendAIChat()">
+                <button onclick="sendAIChat()" style="padding: 0.8rem 1.5rem; border-radius: 0.8rem; border: none; background: var(--accent-purple); color: white; cursor: pointer; font-weight: 600;">전송</button>
             </div>
         </div>
 
@@ -492,13 +493,39 @@
         }
 
         async function updateAISuggestion() {
-            const el = document.getElementById('ai-suggestion');
-            el.innerText = "제미나이가 새로운 전략을 짜고 있습니다...";
+            const chatWin = document.getElementById('ai-chat-window');
+            chatWin.innerHTML += `<div style="color: var(--accent-purple);"><b>AI 매니저:</b> 새로운 시장 분석을 시작합니다...</div>`;
             try {
                 const res = await fetch('/api/ai-suggestion');
                 const data = await res.json();
-                el.innerText = data.suggestion;
-            } catch (e) { el.innerText = "분석 실패. 다시 시도해 주세요."; }
+                chatWin.innerHTML += `<div style="color: var(--accent-purple);"><b>AI 매니저:</b> ${data.suggestion}</div>`;
+                chatWin.scrollTop = chatWin.scrollHeight;
+            } catch (e) { }
+        }
+
+        async function sendAIChat() {
+            const msgInput = document.getElementById('ai-chat-msg');
+            const msg = msgInput.value;
+            if(!msg) return;
+
+            const chatWin = document.getElementById('ai-chat-window');
+            chatWin.innerHTML += `<div style="text-align: right; color: var(--accent-blue);"><b>나:</b> ${msg}</div>`;
+            msgInput.value = '';
+            chatWin.scrollTop = chatWin.scrollHeight;
+
+            try {
+                const res = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+                const data = await res.json();
+                chatWin.innerHTML += `<div style="color: var(--accent-purple);"><b>AI 매니저:</b> ${data.reply.replace(/\n/g, '<br>')}</div>`;
+                chatWin.scrollTop = chatWin.scrollHeight;
+                if(data.reply.includes("등록했습니다")) loadRules();
+            } catch (e) {
+                 chatWin.innerHTML += `<div style="color: #f87171;"><b>에러:</b> 연결 실패</div>`;
+            }
         }
 
         async function extractFromChat() {
