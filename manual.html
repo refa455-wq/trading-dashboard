@@ -23,7 +23,17 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .edit-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .edit-btn:hover { background: #1d4ed8; text-decoration: none; }
         h2 { margin-top: 40px; color: #38bdf8; }
         .card {
             background: var(--card);
@@ -51,7 +61,10 @@
 <body>
     <div class="container">
         <a href="/" class="back-btn">← 대시보드로 돌아가기</a>
-        <h1>🛠️ 트레이딩 본부 통합 매뉴얼</h1>
+        <h1>
+            <span>🛠️ 트레이딩 본부 통합 매뉴얼</span>
+            <a href="https://github.com/refa455-wq/trading-dashboard/edit/main/manual.html" target="_blank" class="edit-btn">✏️ 매뉴얼 수정하기</a>
+        </h1>
         
         <div class="card">
             <h2>🏗️ 1. GitHub (코드 업데이트)</h2>
@@ -63,11 +76,27 @@
         </div>
 
         <div class="card">
-            <h2>🚀 2. Render (서버 및 도메인 관리)</h2>
+            <h2>🚀 2. Render (서버 접속 및 비밀번호)</h2>
             <p>24시간 서버 가동과 접속 주소를 관리합니다.</p>
+            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                <p style="margin: 0; font-size: 1.1rem;"><b>🔐 고정 로그인 정보</b></p>
+                <p style="margin: 5px 0 0 0; font-size: 1.3rem; color: var(--primary); font-weight: bold; letter-spacing: 1px;">
+                    ID: admin / PW: 1234
+                </p>
+            </div>
+            <ul style="margin-top: 15px;">
+                <li><b>접속 주소:</b> <a href="https://dashboard-ai9x.onrender.com" target="_blank">dashboard-ai9x.onrender.com</a></li>
+                <li><b>비번 수정:</b> Render Dashboard의 [Environment] 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 바꾸고 저장하세요.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="border: 1px solid #ef4444;">
+            <h2 style="color: #ef4444;">⚠️ 3. 화면이 멈췄거나 안 뜰 때</h2>
+            <p>서버가 업데이트 중이거나 잠시 휴식이 필요할 때 발생합니다.</p>
             <ul>
-                <li><b>주소:</b> <a href="https://dashboard-ai9x.onrender.com">dashboard-ai9x.onrender.com</a></li>
-                <li><b>비밀번호 수정:</b> Render Dashboard의 <b>[Environment]</b> 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 변경하고 저장하세요.</li>
+                <li><b>대기:</b> 깃허브 업로드 직후에는 약 2~3분간 '빌드(설치)' 시간이 필요합니다.</li>
+                <li><b>로그 확인:</b> Render 사이트의 <b>[Logs]</b> 메뉴를 눌러 에러가 있는지 보세요.</li>
+                <li><b>강제 재시작:</b> Render 상단의 <b>[Manual Deploy]</b> -> <b>[Clear Build Cache & Deploy]</b>를 누르면 깨끗하게 다시 켜집니다.</li>
             </ul>
         </div>
 
