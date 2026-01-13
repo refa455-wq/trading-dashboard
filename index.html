@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kimpu Dashboard - 실시간 모니터링</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --accent-blue: #38bdf8;
+        --accent-purple: #818cf8;
+        --text-main: #f8fafc;
+        --text-dim: #94a3b8;
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --up-color: #f87171;
+        --down-color: #4ade80;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", "Noto Sans KR", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        overflow-x: hidden;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(56, 189, 248, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(129, 140, 248, 0.05) 0%,
+            transparent 40%
+          );
+      }
+
+      header {
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--glass-border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          to right,
+          var(--accent-blue),
+          var(--accent-purple)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .mode-toggle {
+        background: var(--card-bg);
+        border: 1px solid var(--glass-border);
+        padding: 0.5rem 1rem;
+        border-radius: 99px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        gap: 10px;
+      }
+
+      .mode-btn {
+        padding: 0.3rem 1rem;
+        border-radius: 99px;
+        font-size: 0.85rem;
+      }
+
+      .mode-btn.active {
+        background: var(--accent-blue);
+        color: var(--bg-color);
+        font-weight: 600;
+      }
+
+      main {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .label {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+      }
+      .value {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+      .sub-value {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        color: var(--accent-blue);
+      }
+
+      .premium-tag {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .premium-high {
+        background: rgba(248, 113, 113, 0.2);
+        color: #f87171;
+      }
+      .premium-low {
+        background: rgba(74, 222, 128, 0.2);
+        color: #4ade80;
+      }
+
+      .balance-list {
+        grid-column: span 2;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th {
+        text-align: left;
+        padding: 1rem;
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        border-bottom: 1px solid var(--glass-border);
+      }
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--glass-border);
+        font-size: 0.95rem;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        background: #4ade80;
+        box-shadow: 0 0 10px #4ade80;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .live {
+        animation: pulse 2s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">KIMPU AI DASHBOARD</div>
+      <div class="mode-toggle">
+        <div id="btn-real" class="mode-btn active" onclick="setMode('real')">
+          실전 투자
+        </div>
+        <div id="btn-mock" class="mode-btn" onclick="setMode('mock')">
+          모의 투자
+        </div>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); display: flex; gap: 15px; align-items: center;">
+        <div id="mock-controls" style="display: none; gap: 10px;">
+            <button onclick="doMockTrade('buy')" style="background: var(--up-color); border: none; padding: 0.3rem 0.8rem; border-radius: 5px; color: white; cursor: pointer; font-weight: 600;">가상 매수(100만)</button>
+            <button onclick="doMockTrade('sell')" style="background: var(--accent-purple); border: none; padding: 0.3rem 0.8rem; border-radius: 5px; color: white; cursor: pointer; font-weight: 600;">가상 전량매도</button>
+        </div>
+        <span><span class="status-dot"></span> API 연결됨</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- 실시간 시세 섹션 -->
+      <div class="grid">
+        <div class="card">
+          <div class="label">바이낸스 (BTC/USDT)</div>
+          <div class="value" id="binance-price">0.00</div>
+          <div class="sub-value" id="fx-rate">환율: ₩0.00</div>
+        </div>
+        <div class="card">
+          <div class="label">업비트 (BTC/KRW)</div>
+          <div class="value" id="upbit-price">0.00</div>
+          <div class="sub-value">
+            김프:
+            <span id="upbit-premium" class="premium-tag premium-high"
+              >0.00%</span
+            >
+          </div>
+        </div>
+        <div class="card">
+          <div class="label">빗썸 (BTC/KRW)</div>
+          <div class="value" id="bithumb-price">0.00</div>
+          <div class="sub-value">
+            김프:
+            <span id="bithumb-premium" class="premium-tag premium-high"
+              >0.00%</span
+            >
+          </div>
+        </div>
+      </div>
+
+        <!-- 잔고 섹션 -->
+        <div class="grid">
+            <div class="card">
+                <div class="label">내 업비트 자산</div>
+                <table id="upbit-balance-table">
+                    <thead><tr><th>자산</th><th>수량</th><th>평단</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="label">내 빗썸 자산</div>
+                <table id="bithumb-balance-table">
+                    <thead><tr><th>자산</th><th>수량</th><th>평단</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AI 추천 전략 섹션 -->
+        <div class="card" style="margin-top: 2rem; border: 1px solid var(--accent-purple); background: rgba(129, 140, 248, 0.1);">
+            <div class="label" style="color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
+                <span class="live">✨</span> Gemini AI 실시간 추천 전략
+            </div>
+            <div id="ai-suggestion" class="value" style="font-size: 1.2rem; margin-top: 1rem; line-height: 1.6;">
+                AI가 시장 데이터를 분석 중입니다...
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 10px;">
+                <button onclick="applyAISuggestion()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; background: var(--accent-purple); color: white; cursor: pointer; font-size: 0.8rem; font-weight: 600;">규칙으로 추가하기</button>
+                <button onclick="updateAISuggestion()" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--glass-border); background: transparent; color: var(--text-dim); cursor: pointer; font-size: 0.8rem;">다시 분석</button>
+            </div>
+        </div>
+
+        <!-- 규칙 관리 섹션 -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="label">트레이딩 규칙(Strategy) 관리</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <input type="text" id="rule-name" placeholder="규칙 이름 (예: 비트코인 역프 매수)" style="flex: 1; padding: 0.8rem; border-radius: 0.8rem; border: 1px solid var(--glass-border); background: var(--bg-color); color: white;">
+                <button onclick="addRule()" style="padding: 0.8rem 1.5rem; border-radius: 0.8rem; border: none; background: var(--accent-blue); color: var(--bg-color); cursor: pointer; font-weight: 600;">규칙 추가</button>
+            </div>
+            <div id="rules-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- 규칙들이 여기에 추가됨 -->
+                <div class="card" style="background: rgba(255,255,255,0.05); padding: 1rem; display: flex; justify-content: space-between;">
+                    <span>기본 김프 매매 (관찰 중)</span>
+                    <span style="color: var(--accent-blue);">수익률: +0.00%</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentMode = 'real';
+        let marketData = {};
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${mode}`).classList.add('active');
+            document.getElementById('mock-controls').style.display = mode === 'mock' ? 'flex' : 'none';
+            updateBalances();
+        }
+
+        async function updateMarketData() {
+            try {
+                const res = await fetch('/api/market-data');
+                const data = await res.json();
+                marketData = data;
+
+                document.getElementById('binance-price').innerText = '$ ' + data.binance.toLocaleString();
+                document.getElementById('fx-rate').innerText = '환율: ₩' + data.usd_krw.toLocaleString();
+                document.getElementById('upbit-price').innerText = '₩ ' + data.upbit.toLocaleString();
+                document.getElementById('bithumb-price').innerText = '₩ ' + data.bithumb.toLocaleString();
+
+                const foreignInKrw = data.binance * data.usd_krw;
+                const upPrem = ((data.upbit / foreignInKrw) - 1) * 100;
+                const bitPrem = ((data.bithumb / foreignInKrw) - 1) * 100;
+
+                const upTag = document.getElementById('upbit-premium');
+                upTag.innerText = upPrem.toFixed(2) + '%';
+                upTag.className = 'premium-tag ' + (upPrem > 3 ? 'premium-high' : 'premium-low');
+
+                const bitTag = document.getElementById('bithumb-premium');
+                bitTag.innerText = bitPrem.toFixed(2) + '%';
+                bitTag.className = 'premium-tag ' + (bitPrem > 3 ? 'premium-high' : 'premium-low');
+
+            } catch (e) { console.error(e); }
+        }
+
+        async function updateBalances() {
+            try {
+                const res = await fetch('/api/balances');
+                const data = await res.json();
+                
+                // 업비트 테이블 업데이트
+                const upTbody = document.querySelector('#upbit-balance-table tbody');
+                upTbody.innerHTML = '';
+                data.upbit.forEach(item => {
+                    if (item.currency === 'KRW') return;
+                    upTbody.innerHTML += `<tr><td><b>${item.currency}</b></td><td>${parseFloat(item.balance).toFixed(4)}</td><td>${parseFloat(item.avg_buy_price).toLocaleString()}</td></tr>`;
+                });
+
+                // 빗썸 테이블 업데이트
+                const bitTbody = document.querySelector('#bithumb-balance-table tbody');
+                bitTbody.innerHTML = '';
+                data.bithumb.forEach(item => {
+                    if (item.currency === 'KRW') return;
+                    bitTbody.innerHTML += `<tr><td><b>${item.currency}</b></td><td>${parseFloat(item.balance).toFixed(4)}</td><td>-</td></tr>`;
+                });
+
+                // 모의투자 지갑 업데이트
+                const mockRes = await fetch('/api/mock-wallet');
+                const mockData = await mockRes.json();
+                const mockTbody = document.createElement('tbody');
+                
+                // 모의투자 UI가 별도로 없으므로, 현재 모드에 따라 교체하거나 추가 표시
+                if (currentMode === 'mock') {
+                    upTbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--accent-purple)">[모의투자 모드] 가상 잔고: ₩${mockData.krw.toLocaleString()}</td></tr>`;
+                    for (const [coin, amt] of Object.entries(mockData.assets)) {
+                        if (amt > 0) upTbody.innerHTML += `<tr><td><b>${coin}</b></td><td>${amt.toFixed(4)}</td><td>가상보유</td></tr>`;
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function doMockTrade(side) {
+            try {
+                const res = await fetch('/api/mock-trade', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        side: side,
+                        symbol: "BTC",
+                        amount_krw: 1000000 // 일단 100만원씩 매수/매도
+                    })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    alert(`${side === 'buy' ? '100만원 가상 매수 완료!' : '가상 전량 매도 완료!'}`);
+                    updateBalances();
+                } else {
+                    alert(`실패: ${result.message}`);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadRules() {
+            try {
+                const res = await fetch('/api/rules');
+                const data = await res.json();
+                const list = document.getElementById('rules-list');
+                list.innerHTML = '';
+                data.forEach(rule => {
+                    list.innerHTML += `<div class="card" style="background: rgba(255,255,255,0.05); padding: 1rem; display: flex; justify-content: space-between;">
+                        <span>${rule.name}</span>
+                        <span style="color: var(--accent-blue);">${rule.status}</span>
+                    </div>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function addRule() {
+            const name = document.getElementById('rule-name').value;
+            if(!name) return;
+            try {
+                await fetch('/api/rules', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: name})
+                });
+                document.getElementById('rule-name').value = '';
+                loadRules();
+            } catch (e) { console.error(e); }
+        }
+
+        async function updateAISuggestion() {
+            const el = document.getElementById('ai-suggestion');
+            el.innerText = "제미나이가 새로운 전략을 짜고 있습니다...";
+            try {
+                const res = await fetch('/api/ai-suggestion');
+                const data = await res.json();
+                el.innerText = data.suggestion;
+            } catch (e) { el.innerText = "분석 실패. 다시 시도해 주세요."; }
+        }
+
+        async function applyAISuggestion() {
+            const suggestion = document.getElementById('ai-suggestion').innerText;
+            if (!suggestion || suggestion.includes("...")) return;
+            
+            try {
+                await fetch('/api/rules', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: suggestion})
+                });
+                loadRules();
+            } catch (e) { console.error(e); }
+        }
+
+        updateMarketData();
+        updateBalances();
+        loadRules();
+        updateAISuggestion();
+        setInterval(updateMarketData, 5000);
+        setInterval(updateBalances, 10000);
+        setInterval(updateAISuggestion, 60000); // 1분마다 AI 분석 업데이트
+    </script>
+</body>
+</html>
