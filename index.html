@@ -248,6 +248,20 @@
             >
           </div>
         </div>
+      
+      <!-- 특별 정보 허브 (Alpha Hub) 추가 -->
+      <div class="card" style="margin-bottom: 2rem; border-left: 5px solid gold; background: linear-gradient(90deg, rgba(255,215,0,0.05), transparent);">
+          <div class="label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: gold; font-weight: 700;">🌟 특별 정보 허브 (Alpha Intelligence)</span>
+              <span style="font-size: 0.7rem;">추천: CryptoQuant, WhaleAlert 연동 권장</span>
+          </div>
+          <div style="display: flex; gap: 15px; margin-top: 1rem; flex-wrap: wrap;">
+              <a href="https://cryptoquant.com/" target="_blank" style="padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border-radius: 0.8rem; color: #f8fafc; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--glass-border);">📈 온체인 데이터 (고래 추적)</a>
+              <a href="https://whale-alert.io/" target="_blank" style="padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border-radius: 0.8rem; color: #f8fafc; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--glass-border);">🐳 대형 지갑 이동 알림</a>
+              <a href="https://coinglass.com/FundingRate" target="_blank" style="padding: 0.6rem 1rem; background: rgba(255,255,255,0.05); border-radius: 0.8rem; color: #f8fafc; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--glass-border);">💰 실시간 펀딩비 (델타중립용)</a>
+              <button onclick="askSpecialAlpha()" style="padding: 0.6rem 1rem; background: gold; color: #000; border-radius: 0.8rem; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer;">✨ AI에게 특별 전략 리서치 시키기</button>
+          </div>
+      </div>
       </div>
 
       <!-- 실시간 차트 섹션 -->
@@ -597,7 +611,27 @@
             } catch (e) { alert("로그를 불러오는 중 오류가 발생했습니다."); }
         }
 
-        updateMarketData();
+        async function askSpecialAlpha() {
+            const chatWin = document.getElementById('ai-chat-window');
+            chatWin.innerHTML += `<div style="background: gold; color: #000; padding: 0.8rem; border-radius: 1rem; align-self: flex-start; max-width: 80%; font-size: 0.85rem; font-weight: 700;">
+                🧠 AI 알파 헌터가 특별 전략을 리서치 중입니다...
+            </div>`;
+            chatWin.scrollTop = chatWin.scrollHeight;
+            
+            try {
+                const res = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: "현재 시장에서 가장 특별하고 남다른 알파(Alpha) 전략 하나만 짜줘. 특히 고래 이동이나 펀딩비 관련해서.", model_type: 'gemini'})
+                });
+                const data = await res.json();
+                chatWin.innerHTML += `<div style="background: rgba(255,215,0,0.1); padding: 1rem; border-radius: 1rem; align-self: flex-start; max-width: 80%; font-size: 0.9rem; border: 1px solid gold;">
+                    <b>🕵️ 알파 헌터 보고:</b><br>${data.reply.replace(/\n/g, '<br>')}
+                </div>`;
+                chatWin.scrollTop = chatWin.scrollHeight;
+                if(data.reply.includes("등록했습니다")) loadRules();
+            } catch (e) { }
+        }
         updateBalances();
         loadRules();
         updateAISuggestion();
