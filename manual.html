@@ -10,6 +10,7 @@
             --bg: #0f172a;
             --card: #1e293b;
             --text: #f1f5f9;
+            --accent-purple: #818cf8;
         }
         body {
             font-family: 'Inter', system-ui, sans-serif;
@@ -24,16 +25,6 @@
             margin: 0 auto;
         }
         h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-        .edit-btn {
-            background: #2563eb;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .edit-btn:hover { background: #1d4ed8; text-decoration: none; }
         h2 { margin-top: 40px; color: #38bdf8; }
         .card {
             background: var(--card);
@@ -42,6 +33,22 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        .highlight-box {
+            background: rgba(129, 140, 248, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-purple);
+            margin: 10px 0;
+        }
+        .link-btn {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .link-btn:hover { text-decoration: underline; }
         code {
             background: #334155;
             padding: 2px 6px;
@@ -66,19 +73,19 @@
         <div class="card">
             <h2>🏗️ 1. GitHub (코드 업데이트)</h2>
             <p>프로그램의 기능을 수정하거나 업데이트할 때 사용합니다.</p>
-            <div style="background: rgba(129, 140, 248, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent-purple);">
+            <div class="highlight-box">
                 <p style="margin: 0;"><b>⬆️ 파일 업로드 및 커밋 주소</b></p>
-                <p style="margin: 5px 0 0 0;"><a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank" style="font-size: 1.1rem; color: #818cf8; font-weight: bold;">[여기를 클릭해서 새 파일 업로드하기]</a></p>
+                <a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank" class="link-btn">[여기를 클릭해서 새 파일 업로드하기]</a>
             </div>
             <ul style="margin-top: 15px;">
-                <li>수정된 파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
+                <li>파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
             </ul>
         </div>
 
         <div class="card">
             <h2>🚀 2. Render (서버 접속 및 비밀번호)</h2>
             <p>24시간 서버 가동과 접속 주소를 관리합니다.</p>
-            <div style="background: rgba(0,210,255,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+            <div class="highlight-box" style="border-left-color: var(--primary); background: rgba(0,210,255,0.05);">
                 <p style="margin: 0; font-size: 1.1rem;"><b>🔐 고정 로그인 정보</b></p>
                 <p style="margin: 5px 0 0 0; font-size: 1.3rem; color: var(--primary); font-weight: bold; letter-spacing: 1px;">
                     ID: admin / PW: 1234
@@ -86,34 +93,47 @@
             </div>
             <ul style="margin-top: 15px;">
                 <li><b>접속 주소:</b> <a href="https://dashboard-ai9x.onrender.com" target="_blank">dashboard-ai9x.onrender.com</a></li>
-                <li><b>비번 수정:</b> Render Dashboard의 [Environment] 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 바꾸고 저장하세요.</li>
+                <li><b>관리자 대시보드:</b> <a href="https://dashboard.render.com/" target="_blank">dashboard.render.com</a></li>
+                <li><b>비번 수정:</b> Render [Environment] 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 수정하세요.</li>
             </ul>
         </div>
 
         <div class="card" style="border: 1px solid #ef4444;">
             <h2 style="color: #ef4444;">⚠️ 3. 화면이 멈췄거나 안 뜰 때</h2>
-            <p>서버가 업데이트 중이거나 잠시 휴식이 필요할 때 발생합니다.</p>
-            <ul>
-                <li><b>대기:</b> 깃허브 업로드 직후에는 약 2~3분간 '빌드(설치)' 시간이 필요합니다.</li>
-                <li><b>로그 확인:</b> <a href="https://dashboard.render.com/web/srv-d5it25muk2gs73dk2nh0/logs?r=1h" target="_blank" style="color: #ef4444; font-weight: bold;">[여기]</a>를 눌러 서버에 에러가 있는지 실시간으로 확인하세요.</li>
-                <li><b>강제 재시작:</b> Render 상단의 <b>[Manual Deploy]</b> -> <b>[Clear Build Cache & Deploy]</b>를 누르면 깨끗하게 다시 켜집니다.</li>
+            <p>서버 업데이트 중이거나 에러 발생 시 확인 방법입니다.</p>
+            <div class="highlight-box" style="border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
+                <p style="margin: 0;"><b>📋 실시간 서버 로그 확인</b></p>
+                <a href="https://dashboard.render.com/web/srv-d5it25muk2gs73dk2nh0/logs?r=1h" target="_blank" style="color: #ef4444;" class="link-btn">[여기를 클릭해서 로그 확인하기]</a>
+            </div>
+            <ul style="margin-top: 15px;">
+                <li><b>강제 재시작:</b> Render 상단 <b>[Manual Deploy]</b> -> <b>[Clear Build Cache & Deploy]</b> 클릭.</li>
+                <li><b>대기:</b> 깃허브 업로드 후 약 2~3분간 설치 시간이 필요합니다.</li>
             </ul>
         </div>
 
         <div class="card">
-            <h2>☁️ 3. Cloudflare (다중 도메인 확보)</h2>
-            <p>서버가 하나 더 필요할 때 사용합니다.</p>
-            <ul>
-                <li>대시보드에서 <b>[Compute & AI]</b> 메뉴를 누르세요.</li>
-                <li>그 안에 있는 <b>[Workers & Pages]</b> -> <b>[Pages]</b>를 선택합니다.</li>
-                <li><b>[Connect to Git]</b>을 눌러서 우리 저장소를 연결하면 끝!</li>
+            <h2>☁️ 4. Cloudflare (다중 도메인 확보)</h2>
+            <p>서버가 하나 더 필요하거나 보조 도메인이 필요할 때 사용합니다.</p>
+            <div class="highlight-box">
+                <p style="margin: 0;"><b>🔗 클라우드플레어 대시보드</b></p>
+                <a href="https://dash.cloudflare.com/" target="_blank" class="link-btn">[여기를 클릭해서 접속하기]</a>
+            </div>
+            <ul style="margin-top: 15px;">
+                <li><b>[Workers & Pages]</b> -> <b>[Pages]</b> 메뉴 선택.</li>
+                <li><b>[Connect to Git]</b>으로 우리 깃허브 저장소를 연결하면 자동 배포됩니다.</li>
             </ul>
         </div>
 
         <div class="card">
-            <h2>🤖 4. AI 자율 엔진</h2>
-            <p>따로 조작하지 않아도 1시간마다 AI가 시장을 분석해 새로운 규칙을 생성합니다.</p>
-            <p>대시보드 메인 화면의 '매매 규칙' 목록에서 <b>[AI 자율]</b> 머리말이 달린 규칙들을 확인하세요.</p>
+            <h2>🤖 5. AI 자율 엔진 작동 방식</h2>
+            <div class="highlight-box" style="border-left-color: #10b981; background: rgba(16, 185, 129, 0.05);">
+                <p style="margin: 0; color: #10b981;"><b>🕒 1시간 주기 자동 업데이트</b></p>
+                <p style="margin: 5px 0 0 0;">AI는 매시간 정각마다 시장을 분석해 새로운 규칙을 생성합니다.</p>
+            </div>
+            <ul style="margin-top: 15px;">
+                <li><b>확인 방법:</b> 대시보드 메인 화면의 '매매 규칙' 목록 확인.</li>
+                <li><b>구분:</b> 이름 앞에 <b>[AI 자율]</b> 머리말이 붙은 규칙들이 AI가 만든 것입니다.</li>
+            </ul>
         </div>
     </div>
 </body>
