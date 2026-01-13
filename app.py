@@ -85,7 +85,7 @@ async def get_market_data():
         # Exchange Rate
         fx = requests.get("https://api.exchangerate-api.com/v4/latest/USD").json()
         
-        return {
+        result = {
             "binance": float(binance['price']),
             "upbit": float(upbit[0]['trade_price']),
             "bithumb": float(bithumb[0]['trade_price']),
@@ -130,8 +130,6 @@ async def get_ai_suggestion():
     
     # 실시간 데이터 수집
     market_data = monitor.get_combined_data()
-    upbit_bal = api_handler.get_upbit_balance()
-    bithumb_bal = api_handler.get_bithumb_balance()
     
     # 프롬프트 생성 (더 구체적으로 변경)
     prompt = f"""
