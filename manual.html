@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>운영 매뉴얼 - 트레이딩 본부</title>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        h2 { margin-top: 40px; color: #38bdf8; }
+        .card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        code {
+            background: #334155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← 대시보드로 돌아가기</a>
+        <h1>🛠️ 트레이딩 본부 통합 매뉴얼</h1>
+        
+        <div class="card">
+            <h2>🏗️ 1. GitHub (코드 업데이트)</h2>
+            <p>프로그램의 기능을 수정하거나 업데이트할 때 사용합니다.</p>
+            <ul>
+                <li>수정된 <code>app.py</code>를 <a href="https://github.com/refa455-wq/trading-dashboard/upload/main" target="_blank">여기</a>에 업로드하세요.</li>
+                <li>파일을 던진 후 하단의 <b>[Commit changes]</b> 버튼을 꼭 눌러야 합니다.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🚀 2. Render (서버 및 도메인 관리)</h2>
+            <p>24시간 서버 가동과 접속 주소를 관리합니다.</p>
+            <ul>
+                <li><b>주소:</b> <a href="https://dashboard-ai9x.onrender.com">dashboard-ai9x.onrender.com</a></li>
+                <li><b>비밀번호 수정:</b> Render Dashboard의 <b>[Environment]</b> 메뉴에서 <code>ADMIN_PASSWORD</code> 값을 변경하고 저장하세요.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📦 3. Supabase (데이터 저장소)</h2>
+            <p>모든 지갑 정보와 매매 규칙이 클라우드에 영구 저장됩니다.</p>
+            <ul>
+                <li><a href="https://supabase.com/dashboard/" target="_blank">슈파베이스 대시보드</a>에서 데이터 테이블을 직접 확인하거나 수정할 수 있습니다.</li>
+                <li>AI가 만든 자율 전략은 <code>trading_rules</code> 테이블에 쌓입니다.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🤖 4. AI 자율 엔진</h2>
+            <p>따로 조작하지 않아도 1시간마다 AI가 시장을 분석해 새로운 규칙을 생성합니다.</p>
+            <p>대시보드 메인 화면의 '매매 규칙' 목록에서 <b>[AI 자율]</b> 머리말이 달린 규칙들을 확인하세요.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -22,6 +22,14 @@ db: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPAB
 monitor = KimchiPremiumMonitor()
 load_dotenv()
 
+# Gemini AI 초기화
+GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GENAI_API_KEY:
+    genai.configure(api_key=GENAI_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+else:
+    model = None
+
 # 보안 설정 (단순 비밀번호)
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "1234") # 기본값은 1234
 security = HTTPBasic()
@@ -127,6 +135,46 @@ async def get_ai_suggestion():
     except Exception as e:
         return {"suggestion": f"AI 분석 중 오류 발생: {str(e)}"}
 
+async def autonomous_rule_generation():
+    if not model or not db:
+        print("AI 자율 엔진: API 키 또는 DB 연결 필요")
+        return
+
+    # 실시간 데이터 수집
+    market_data = monitor.get_combined_data()
+    kimpi_upbit = ((market_data['prices']['upbit'] / (market_data['prices']['binance'] * market_data['fx_rate'])) - 1) * 100
+    
+    prompt = f"""
+    당신은 24시간 자율 트레이딩 봇입니다. 현재 김프 {kimpi_upbit:.2f}% 상황에 맞는 
+    '수익 도달 가능성이 높은 김치 프리미엄 매매 규칙' 3개를 JSON 리스트 형식으로만 생성해 주세요.
+    각 규칙은 'name' 필드만 포함합니다. 예: ["업비트 김프 1% 이하 매수", "빗썸 전송용 리플 확보"]
+    반드시 [ "규칙1", "규칙2", ... ] 형식의 JSON으로만 대답하세요. 다른 설명은 필요 없습니다.
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        text = response.text.replace('```json', '').replace('```', '').strip()
+        new_rules = json.loads(text)
+        
+        for rule_name in new_rules:
+            db.table("trading_rules").insert({
+                "name": f"[AI 자율] {rule_name}",
+                "status": f"매수 대기 중 (현재 김프 {kimpi_upbit:.2f}%)"
+            }).execute()
+        print(f"AI 자율 엔진: {len(new_rules)}개의 새로운 규칙 생성 완료")
+    except Exception as e:
+        print(f"AI 자율 엔진 오류: {str(e)}")
+
+async def autonomous_loop():
+    while True:
+        await autonomous_rule_generation()
+        await asyncio.sleep(3600) # 1시간마다 실행
+
+import asyncio
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(autonomous_loop())
+
 @app.get("/api/mock-wallet")
 async def get_mock_wallet():
     if db:
@@ -186,6 +234,11 @@ async def get_balances():
 @app.get("/", response_class=HTMLResponse)
 async def read_index(token: str = Depends(authenticate)):
     with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/manual", response_class=HTMLResponse)
+async def read_manual():
+    with open("manual.html", "r", encoding="utf-8") as f:
         return f.read()
 
 if __name__ == "__main__":
