@@ -1,0 +1,4 @@
+# Cloudflare Pages Build Configuration
+# Framework: FastAPI / Python
+# Build Command: pip install -r requirements.txt
+# Output Directory: .

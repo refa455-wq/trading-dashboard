@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       :root {
         --bg-color: #0f172a;
@@ -208,6 +209,7 @@
         <div id="btn-mock" class="mode-btn" onclick="setMode('mock')">
           모의 투자
         </div>
+        <a href="/manual" target="_blank" class="mode-btn" style="text-decoration: none; color: var(--text-dim); border: 1px dashed var(--glass-border);">운영 매뉴얼</a>
       </div>
       <div style="font-size: 0.8rem; color: var(--text-dim); display: flex; gap: 15px; align-items: center;">
         <div id="mock-controls" style="display: none; gap: 10px;">
@@ -248,6 +250,15 @@
         </div>
       </div>
 
+      <!-- 실시간 차트 섹션 -->
+      <div class="card" style="margin-bottom: 2rem; height: 350px;">
+        <div class="label" style="display: flex; justify-content: space-between;">
+            <span>실시간 김치 프리미엄 변동 (업비트 기준)</span>
+            <span id="chart-status" style="font-size: 0.7rem; color: var(--accent-blue);">● LIVE</span>
+        </div>
+        <canvas id="premiumChart" style="max-height: 280px;"></canvas>
+      </div>
+
         <!-- 잔고 섹션 -->
         <div class="grid">
             <div class="card">
@@ -271,7 +282,7 @@
             <div class="label" style="color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
                 <span class="live">✨</span> Gemini AI 실시간 추천 전략
             </div>
-            <div id="ai-suggestion" class="value" style="font-size: 1.2rem; margin-top: 1rem; line-height: 1.6;">
+            <div id="ai-suggestion" class="value" style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.6; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 1rem; min-height: 80px;">
                 AI가 시장 데이터를 분석 중입니다...
             </div>
             <div style="margin-top: 1rem; display: flex; gap: 10px;">
@@ -300,6 +311,53 @@
     <script>
         let currentMode = 'real';
         let marketData = {};
+        let premiumChart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('premiumChart').getContext('2d');
+            premiumChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Upbit Premium (%)',
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                        data: [],
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function updateChart() {
+            try {
+                const res = await fetch('/api/price-history');
+                const history = await res.json();
+                
+                premiumChart.data.labels = history.map(h => h.time);
+                premiumChart.data.datasets[0].data = history.map(h => h.premium_up);
+                premiumChart.update('none'); // 애니메이션 없이 업데이트 (성능용)
+            } catch (e) { console.error(e); }
+        }
 
         function setMode(mode) {
             currentMode = mode;
@@ -449,9 +507,11 @@
         updateBalances();
         loadRules();
         updateAISuggestion();
+        initChart();
         setInterval(updateMarketData, 5000);
+        setInterval(updateChart, 5000);
         setInterval(updateBalances, 10000);
-        setInterval(updateAISuggestion, 60000); // 1분마다 AI 분석 업데이트
+        setInterval(updateAISuggestion, 120000); // 2분마다 AI 분석 업데이트
     </script>
 </body>
 </html>

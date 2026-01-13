@@ -22,6 +22,9 @@ db: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPAB
 monitor = KimchiPremiumMonitor()
 load_dotenv()
 
+# 가격 히스토리 저장용 (차트용)
+price_history = []
+
 # Gemini AI 초기화
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GENAI_API_KEY:
@@ -88,8 +91,23 @@ async def get_market_data():
             "bithumb": float(bithumb[0]['trade_price']),
             "usd_krw": fx['rates']['KRW']
         }
+        
+        # 히스토리 추가
+        price_history.append({
+            "time": time.strftime("%H:%M:%S"),
+            "upbit": result["upbit"],
+            "bithumb": result["bithumb"],
+            "premium_up": ((result["upbit"] / (result["binance"] * result["usd_krw"])) - 1) * 100
+        })
+        if len(price_history) > 50: price_history.pop(0)
+        
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/price-history")
+async def get_price_history():
+    return price_history
 
 @app.get("/api/rules")
 async def get_rules():
@@ -126,7 +144,8 @@ async def get_ai_suggestion():
     - 환율: ₩{market_data['fx_rate']:,}
     - 현재 프리미엄: 업비트 {(((market_data['prices']['upbit'] / (market_data['prices']['binance'] * market_data['fx_rate'])) - 1) * 100):.2f}%, 빗썸 {(((market_data['prices']['bithumb'] / (market_data['prices']['binance'] * market_data['fx_rate'])) - 1) * 100):.2f}%
     
-    한 문장으로 아주 구체적으로 무엇을 살지 팔지 제안하세요.
+    한 문장으로 아주 구체적인 액션(매수/매도/대기)과 그 이유, 예상 수익률을 포함해서 제안하세요. 
+    형식: "[액션] 이유 (예상 수익: +N%)"
     """
     
     try:
